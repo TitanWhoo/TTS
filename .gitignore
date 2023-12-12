@@ -1,3 +1,5 @@
+workspace/datasets/*
+workspace/models/*
 WadaSNR/
 .idea/
 *.pyc

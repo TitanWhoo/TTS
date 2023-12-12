@@ -15,11 +15,11 @@ LOGGER_URI = None
 
 # Set here the path that the checkpoints will be saved. Default: ./run/training/
 OUT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
-DATASET_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
+DATASET_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "datasets")
 # Training Parameters
 OPTIMIZER_WD_ONLY_ON_WEIGHTS = True  # for multi-gpu training please make it False
 START_WITH_EVAL = True  # if True it will star with evaluation
-BATCH_SIZE = 8  # set here the batch size
+BATCH_SIZE = 6  # set here the batch size
 GRAD_ACUMM_STEPS = 84  # set here the grad accumulation steps
 # Note: we recommend that BATCH_SIZE * GRAD_ACUMM_STEPS need to be at least 252 for more efficient training. You can increase/decrease BATCH_SIZE but then set GRAD_ACUMM_STEPS accordingly.
 
@@ -27,8 +27,8 @@ GRAD_ACUMM_STEPS = 84  # set here the grad accumulation steps
 config_dataset = BaseDatasetConfig(
     formatter="titan",
     dataset_name="ldg",
-    path=DATASET_PATH,
-    meta_file_train=os.path.join(DATASET_PATH, "meta.txt"),
+    path=os.path.join(DATASET_PATH, 'ljspeech_ldg'),
+    meta_file_train=os.path.join(DATASET_PATH, 'ljspeech_ldg', "meta.txt"),
     language="zh-cn",
 )
 
@@ -69,7 +69,7 @@ if not os.path.isfile(TOKENIZER_FILE) or not os.path.isfile(XTTS_CHECKPOINT):
 
 # Training sentences generations
 SPEAKER_REFERENCE = [
-    "./tests/data/ljspeech/wavs/LJ001-0002.wav"  # speaker reference to be used in training test sentences
+    os.path.join(DATASET_PATH, "sample.wav")
 ]
 LANGUAGE = config_dataset.language
 
