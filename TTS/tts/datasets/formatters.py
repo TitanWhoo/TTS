@@ -11,7 +11,23 @@ from tqdm import tqdm
 ########################
 # DATASETS
 ########################
-
+def titan(root_path, meta_file, **kwargs):  # pylint: disable=unused-argument
+    """Normalizes the LJSpeech meta data file to TTS format
+    https://keithito.com/LJ-Speech-Dataset/"""
+    txt_file = os.path.join(root_path, meta_file)
+    items = []
+    with open(txt_file, "r", encoding="utf-8") as ttf:
+        for line in ttf:
+            cols = line.split("|")
+            if len(cols) !=3 :
+                continue
+            wav_file = cols[0]
+            speaker_name = cols[1]
+            text : str = cols[2]
+            if re.search(r'[\u4e00-\u9fff]', text) is None:
+                continue
+            items.append({"text": text, "audio_file": wav_file, "speaker_name": speaker_name, "root_path": root_path})
+    return items
 
 def cml_tts(root_path, meta_file, ignored_speakers=None):
     """Normalizes the CML-TTS meta data file to TTS format
