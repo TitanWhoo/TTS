@@ -19,16 +19,16 @@ DATASET_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dataset
 # Training Parameters
 OPTIMIZER_WD_ONLY_ON_WEIGHTS = True  # for multi-gpu training please make it False
 START_WITH_EVAL = True  # if True it will star with evaluation
-BATCH_SIZE = 6  # set here the batch size
+BATCH_SIZE = 4  # set here the batch size
 GRAD_ACUMM_STEPS = 84  # set here the grad accumulation steps
 # Note: we recommend that BATCH_SIZE * GRAD_ACUMM_STEPS need to be at least 252 for more efficient training. You can increase/decrease BATCH_SIZE but then set GRAD_ACUMM_STEPS accordingly.
 
 # Define here the dataset that you want to use for the fine-tuning on.
 config_dataset = BaseDatasetConfig(
-    formatter="titan",
-    dataset_name="ldg",
-    path=os.path.join(DATASET_PATH, 'ljspeech_ldg'),
-    meta_file_train=os.path.join(DATASET_PATH, 'ljspeech_ldg', "meta.txt"),
+    formatter="aidatatang",
+    dataset_name="aidatatang_200zh",
+    path=os.path.join(DATASET_PATH, 'aidatatang_200zh'),
+    meta_file_train="train",
     language="zh-cn",
 )
 
@@ -115,6 +115,7 @@ def main():
         plot_step=100,
         log_model_step=1000,
         save_step=1000,
+        run_eval_steps=5000,
         save_n_checkpoints=3,
         save_checkpoints=True,
         # target_loss="loss",
@@ -129,19 +130,19 @@ def main():
         lr_scheduler_params={"milestones": [50000 * 18, 150000 * 18, 300000 * 18], "gamma": 0.5, "last_epoch": -1},
         test_sentences=[
             {
-                "text": "既然居无定所，我只好把心爱的书藏诸纸箱。",
+                "text": "既然居无定所，我只好把心爱的书，藏诸纸箱。",
                 "speaker_wav": SPEAKER_REFERENCE,
-                "language": LANGUAGE,
+                "language": "zh-cn",
             },
             {
-                "text": "请给我订一张明天早上五点或者六点的机票，最好在美团上订，谢谢。",
+                "text": "请给我订一张明天早上五点或者六点的机票，最好在携程上订，谢谢！",
                 "speaker_wav": SPEAKER_REFERENCE,
-                "language": LANGUAGE,
+                "language": "zh-cn",
             },
             {
-                "text": "雄关漫道真如铁，而今迈步从头越。",
+                "text": "May there be enough clouds in your life to make a beautiful sunset.",
                 "speaker_wav": SPEAKER_REFERENCE,
-                "language": LANGUAGE,
+                "language": "en",
             },
         ],
     )

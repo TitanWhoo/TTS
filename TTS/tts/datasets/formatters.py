@@ -12,25 +12,6 @@ from tqdm import tqdm
 ########################
 # DATASETS
 ########################
-def titan(root_path, meta_file, **kwargs):  # pylint: disable=unused-argument
-    """Normalizes the LJSpeech meta data file to TTS format
-    https://keithito.com/LJ-Speech-Dataset/"""
-    txt_file = os.path.join(root_path, meta_file)
-    items = []
-    with open(txt_file, "r", encoding="utf-8") as ttf:
-        for line in ttf:
-            cols = line.split("|")
-            if len(cols) != 3:
-                continue
-            wav_file = os.path.join(root_path, cols[0])
-            speaker_name = cols[1]
-            text: str = cols[2]
-            if re.search(r'[\u4e00-\u9fff]', text) is None:
-                continue
-            items.append({"text": text, "audio_file": wav_file, "speaker_name": speaker_name, "root_path": root_path})
-    return items
-
-
 def cml_tts(root_path, meta_file, ignored_speakers=None):
     """Normalizes the CML-TTS meta data file to TTS format
     https://github.com/freds0/CML-TTS-Dataset/"""
@@ -612,7 +593,7 @@ def emotion(root_path, meta_file, ignored_speakers=None):
     return items
 
 
-def baker(root_path: str, meta_file: str, **kwargs) -> List[List[str]]:  # pylint: disable=unused-argument
+def baker(root_path: str, meta_file: str, **kwargs) -> List[dict]:  # pylint: disable=unused-argument
     """Normalizes the Baker meta data file to TTS format
 
     Args:
@@ -621,14 +602,18 @@ def baker(root_path: str, meta_file: str, **kwargs) -> List[List[str]]:  # pylin
     Returns:
         List[List[str]]: List of (text, wav_path, speaker_name) associated with each sentences
     """
-    txt_file = os.path.join(root_path, meta_file)
+    pattern = re.compile("#\d+")
+    txt_file = os.path.join(root_path, "ProsodyLabeling", meta_file)
     items = []
     speaker_name = "baker"
     with open(txt_file, "r", encoding="utf-8") as ttf:
         for line in ttf:
-            wav_name, text = line.rstrip("\n").split("|")
-            wav_path = os.path.join(root_path, "clips_22", wav_name)
+            # read line and skip next line
+            wav_name, text = line.rstrip("\n").split("\t")
+            wav_path = os.path.join(root_path, "Wave", wav_name + ".wav")
+            text = pattern.sub("", text)
             items.append({"text": text, "audio_file": wav_path, "speaker_name": speaker_name, "root_path": root_path})
+            _ = next(ttf)
     return items
 
 
@@ -673,5 +658,43 @@ def bel_tts_formatter(root_path, meta_file, **kwargs):  # pylint: disable=unused
     return items
 
 
-if __name__ == '__main__':
-    os.path.join()
+def aidatatang(root_path, meta_file=None, **kwargs):  # pylint: disable=unused-argument
+    items = []
+    if meta_file is None:
+        return items
+    for root, dirs, _ in os.walk(root_path):
+        for speaker_dir in dirs:
+            speaker_name = speaker_dir
+            for speaker_dir_root, _, files in os.walk(str(os.path.join(root_path, speaker_dir))):
+                for file in files:
+                    if file.endswith(".wav"):
+                        wav_file = os.path.join(speaker_dir_root, file)
+                        text_file = wav_file.replace("wav", "txt")
+                        with open(file=text_file, encoding="utf-8") as f:
+                            text = f.read().strip()
+                        items.append({
+                            "text": text,
+                            "audio_file": wav_file,
+                            "speaker_name": speaker_name,
+                            "root_path": root_path
+                        })
+    return items
+
+
+def titan(root_path, meta_file, **kwargs):  # pylint: disable=unused-argument
+    """Normalizes the LJSpeech metadata file to TTS format
+    https://keithito.com/LJ-Speech-Dataset/"""
+    txt_file = os.path.join(root_path, meta_file)
+    items = []
+    with open(txt_file, "r", encoding="utf-8") as ttf:
+        for line in ttf:
+            cols = line.split("|")
+            if len(cols) != 3:
+                continue
+            wav_file = os.path.join(root_path, cols[0])
+            speaker_name = cols[1]
+            text: str = cols[2]
+            if re.search(r'[\u4e00-\u9fff]', text) is None:
+                continue
+            items.append({"text": text, "audio_file": wav_file, "speaker_name": speaker_name, "root_path": root_path})
+    return items
