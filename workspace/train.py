@@ -16,19 +16,21 @@ LOGGER_URI = None
 # Set here the path that the checkpoints will be saved. Default: ./run/training/
 OUT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
 DATASET_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "datasets")
+REFERENCE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reference")
+
 # Training Parameters
 OPTIMIZER_WD_ONLY_ON_WEIGHTS = True  # for multi-gpu training please make it False
 START_WITH_EVAL = True  # if True it will star with evaluation
-BATCH_SIZE = 4  # set here the batch size
+BATCH_SIZE = 3  # set here the batch size
 GRAD_ACUMM_STEPS = 84  # set here the grad accumulation steps
 # Note: we recommend that BATCH_SIZE * GRAD_ACUMM_STEPS need to be at least 252 for more efficient training. You can increase/decrease BATCH_SIZE but then set GRAD_ACUMM_STEPS accordingly.
 
 # Define here the dataset that you want to use for the fine-tuning on.
 config_dataset = BaseDatasetConfig(
-    formatter="aidatatang",
-    dataset_name="aidatatang_200zh",
-    path=os.path.join(DATASET_PATH, 'aidatatang_200zh'),
-    meta_file_train="train",
+    formatter="baker",
+    dataset_name="baker",
+    path=os.path.join(DATASET_PATH, 'BZNSYP'),
+    meta_file_train="000001-010000.txt",
     language="zh-cn",
 )
 
@@ -69,7 +71,8 @@ if not os.path.isfile(TOKENIZER_FILE) or not os.path.isfile(XTTS_CHECKPOINT):
 
 # Training sentences generations
 SPEAKER_REFERENCE = [
-    os.path.join(DATASET_PATH, "sample.wav")
+    os.path.join(REFERENCE_PATH, f"{i}.wav")
+    for i in range(1, 200)
 ]
 LANGUAGE = config_dataset.language
 
@@ -115,7 +118,6 @@ def main():
         plot_step=100,
         log_model_step=1000,
         save_step=1000,
-        run_eval_steps=5000,
         save_n_checkpoints=3,
         save_checkpoints=True,
         # target_loss="loss",
